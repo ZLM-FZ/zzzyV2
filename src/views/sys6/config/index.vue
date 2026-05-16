@@ -30,7 +30,7 @@
           </el-switch>
         </p>
         <p>
-          <span>补丁是否使用中文：</span>
+          <span>补丁是否使用中文：(关-中文、开-英文)</span>
           <el-switch v-model="formData.isPathUseEN" active-color="#13ce66">
           </el-switch>
         </p>

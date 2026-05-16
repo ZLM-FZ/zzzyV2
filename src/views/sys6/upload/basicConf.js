@@ -172,17 +172,14 @@ export const _splitChangPingGuiGe = (str) => {
 // 配置中文的补丁
 export const _setCnPatch = (str)=>{
   if(!str || str ==='NO' || str ==='No' || str ==='no') return ''
-  if(__win_data.isPathUseEN){
-    let res = ''
-    const inx = _findIndex(_patchOpts,['value',str])
-    if(inx === -1){
-      res = str
-    }else{
-      res = _patchOpts[inx].label
-    }
-    return res
+  const inx = _findIndex(_patchOpts,['value',str])
+  if(inx === -1){
+    return str
   }
-  return str
+  if(__win_data.isPathUseEN){
+    return str // 开启英文模式，返回原始英文 value
+  }
+  return _patchOpts[inx].label // 关闭英文模式，返回中文 label
 }
 
 // 配置中文的套装
