@@ -14,16 +14,28 @@
         <download-excel :class="['export-img img']" :data="imgExport.data || []" :name="imgExport.name">
           <i class="el-icon-download"></i>下载img
         </download-excel>
+        <download-excel :class="['export-img img']" :data="imgExportV2.data || []" :name="imgExportV2.name">
+          <i class="el-icon-download"></i>下载imgV2
+        </download-excel>
       </template>
-      <el-button
-        v-else
-        :class="['export-img', 'img']"
-        size="small"
-        :loading="newExportLoading === 'img'"
-        @click="downloadNewImgXlsx"
-      >
-        <i class="el-icon-download"></i>下载img
-      </el-button>
+      <template v-else>
+        <el-button
+          :class="['export-img', 'img']"
+          size="small"
+          :loading="newExportLoading === 'img'"
+          @click="downloadNewImgXlsx"
+        >
+          <i class="el-icon-download"></i>下载img
+        </el-button>
+        <el-button
+          :class="['export-img', 'img']"
+          size="small"
+          :loading="newExportLoading === 'imgV2'"
+          @click="downloadNewImgV2Xlsx"
+        >
+          <i class="el-icon-download"></i>下载imgV2
+        </el-button>
+      </template>
 
       <div class="line"></div>
 
@@ -109,8 +121,10 @@ import {
   findIndex as _findIndex
 } from "lodash";
 import { _exportTabel as _exportImg } from "./utils/imgExport.js";
+import { _exportTabelV2 as _exportImgV2 } from "./utils/imgExportV2.js";
 import {
   exportReportXlsx,
+  exportReportXlsxV2,
   exportOrderCategoryXlsx,
   exportJianhaoXlsx,
 } from "./utils/excelReal/index.js";
@@ -155,6 +169,10 @@ export default {
         name: "",
       },
       imgExport: {
+        data: [],
+        name: "",
+      },
+      imgExportV2: {
         data: [],
         name: "",
       },
@@ -254,6 +272,25 @@ export default {
         this.newExportLoading = "";
       }
     },
+    async downloadNewImgV2Xlsx() {
+      if (!this.ensureExportReady()) return;
+      this.startExportDebugSession("报货V2真 xlsx");
+      this.newExportLoading = "imgV2";
+      try {
+        await exportReportXlsxV2({
+          flatDataSource: this._EXPORT_DATAS.flatDataSource,
+          filename: this.imgExportV2.name,
+          onProgress: this.makeImgProgress("报货V2"),
+        });
+        this.$message.success("已下载报货表V2（真 xlsx）");
+      } catch (e) {
+        console.error(e);
+        this.onExcelExportUiLog({ line: `[error] 报货V2导出失败：${e && e.message ? e.message : e}` });
+        this.$message.error("报货V2导出失败");
+      } finally {
+        this.newExportLoading = "";
+      }
+    },
     async downloadNewOrderXlsx(item) {
       if (!this.ensureExportReady()) return;
       this.startExportDebugSession(`做单：${item.label || item.valKey}`);
@@ -306,6 +343,7 @@ export default {
       }
       this.timer = getDay();
       this.exportImg(this._EXPORT_DATAS.flatDataSource);
+      this.exportImgV2();
       this.exportJianhao();
       this.exportOrders(this._EXPORT_DATAS.doOrdersDataSource);
       this.$message.success("导出成功，快去下载");
@@ -320,6 +358,10 @@ export default {
     exportImg() {
       this.imgExport.data = _exportImg(this._EXPORT_DATAS.flatDataSource);
       this.imgExport.name = `${this.fileName || ""}报货-${this.timer}.xlsx`;
+    },
+    exportImgV2() {
+      this.imgExportV2.data = _exportImgV2(this._EXPORT_DATAS.flatDataSource);
+      this.imgExportV2.name = `${this.fileName || ""}报货V2-${this.timer}.xlsx`;
     },
     exportJianhao() {
       const resdata = jianhaoExcelInit(this._EXPORT_DATAS.jianhaoDataSource);

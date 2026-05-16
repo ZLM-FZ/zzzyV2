@@ -23,7 +23,9 @@ import {
   TableColumn,
   Card,
   Switch,
-  Alert
+  Alert,
+  Collapse,
+  CollapseItem
 } from "element-ui";
 import JsonExcel from "vue-json-excel";
 
@@ -47,6 +49,8 @@ Vue.use(TableColumn);
 Vue.use(Card);
 Vue.use(Switch);
 Vue.use(Alert);
+Vue.use(Collapse);
+Vue.use(CollapseItem);
 Vue.prototype.$message = Message;
 Vue.component("downloadExcel", JsonExcel);
 

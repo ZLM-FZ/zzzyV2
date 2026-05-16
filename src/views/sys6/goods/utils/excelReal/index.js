@@ -1,5 +1,6 @@
 import ExcelJS from "exceljs";
 import { prepareReportImgChunks } from "../imgExport.js";
+import { prepareReportImgChunksV2 } from "../imgExportV2.js";
 import { prepareOrderExportChunks } from "../ordersExport.js";
 import { prepareJianhaoSheetRows } from "../jianhaoExcel.js";
 import { buildReportSheet } from "./buildReportSheet.js";
@@ -34,6 +35,32 @@ export async function exportReportXlsx(opts) {
   xlLog("报货 开始 writeBuffer + 下载", filename);
   await saveWorkbookAs(workbook, filename);
   xlLog("报货 导出结束", "done");
+}
+
+/** 报货V2：真 xlsx + 内嵌图（去域名合并相同图片） */
+export async function exportReportXlsxV2(opts) {
+  const { flatDataSource, filename, skipImages, onProgress, imageFetchConcurrency } = opts;
+  xlLogReset();
+  xlLog("报货V2 导出开始", { filename });
+  const chunks = prepareReportImgChunksV2(flatDataSource || []);
+  let imgSlots = 0;
+  for (const row of chunks) {
+    for (let j = 0; j < 4; j++) {
+      if (row[j] && row[j].imgUrl) imgSlots += 1;
+    }
+  }
+  xlLog("报货V2 数据就绪", { chunkRows: chunks.length, imageSlots: imgSlots });
+  const workbook = new ExcelJS.Workbook();
+  workbook.creator = "zuodan";
+  await buildReportSheet(workbook, chunks, {
+    skipImages,
+    onProgress,
+    imageFetchConcurrency,
+    logContext: "报货V2",
+  });
+  xlLog("报货V2 开始 writeBuffer + 下载", filename);
+  await saveWorkbookAs(workbook, filename);
+  xlLog("报货V2 导出结束", "done");
 }
 
 /**
